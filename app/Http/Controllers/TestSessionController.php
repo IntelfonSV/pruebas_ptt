@@ -7,9 +7,11 @@ use App\Models\ProductVersion;
 use App\Models\TestSession;
 use App\Models\TestResult;
 use App\Models\TestType;
+use App\Models\TestResultAttachment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 class TestSessionController extends Controller
 {
@@ -56,11 +58,15 @@ class TestSessionController extends Controller
     {
         $validated = $request->validate([
             'product_version_id' => 'required|exists:product_versions,id',
-            'results' => 'required|array',
+            'results' => 'required',
             'results.*.test_id' => 'required|exists:tests,id',
             'results.*.result' => 'required|in:aprobado,reprobado',
             'results.*.notes' => 'nullable|string',
         ]);
+
+        $resultsData = is_string($validated['results'])
+            ? json_decode($validated['results'], true)
+            : $validated['results'];
 
         $session = TestSession::create([
             'session_code' => TestSession::generateCode(),
@@ -68,22 +74,41 @@ class TestSessionController extends Controller
             'user_performer' => Session::get('username'),
         ]);
 
-        foreach ($validated['results'] as $result) {
-            TestResult::create([
+        foreach ($resultsData as $result) {
+            $testResult = TestResult::create([
                 'test_session_id' => $session->id,
                 'test_id' => $result['test_id'],
                 'result' => $result['result'],
                 'notes' => $result['notes'] ?? null,
             ]);
+
+            $testId = $result['test_id'];
+            if ($request->hasFile("attachments.{$testId}")) {
+                $files = $request->file("attachments.{$testId}");
+                foreach (is_array($files) ? $files : [$files] as $file) {
+                    $filename = time() . '_' . $file->getClientOriginalName();
+                    $path = $file->storeAs('test-attachments', $filename, 'public');
+                    TestResultAttachment::create([
+                        'test_result_id' => $testResult->id,
+                        'filename' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'mime_type' => $file->getMimeType(),
+                        'size' => $file->getSize(),
+                    ]);
+                }
+            }
         }
 
         return redirect()->route('test-sessions.show', $session->id);
     }
 
-    public function show(TestSession $testSession)
+    public function show($id)
     {
-        $testSession->load('results.test.testType');
-        $testSession->load('productVersion.product');
+        $testSession = TestSession::with([
+            'results.test.testType',
+            'results.attachments',
+            'productVersion.product'
+        ])->findOrFail($id);
 
         return Inertia::render('test-sessions/show', [
             'session' => $testSession,

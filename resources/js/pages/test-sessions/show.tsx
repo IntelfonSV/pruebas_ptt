@@ -18,12 +18,22 @@ interface TestResult {
     id: number;
     result: string;
     notes: string | null;
+    test_id: number;
     test: {
+        id: number;
         name: string;
         description: string | null;
         expected_result: string;
-        testType: TestType;
+        test_type_id: number;
+        test_type?: TestType;
     };
+    attachments: {
+        id: number;
+        filename: string;
+        original_name: string;
+        mime_type: string;
+        size: number;
+    }[];
 }
 
 interface TestSession {
@@ -53,7 +63,7 @@ export default function TestSessionsShow({ session, currentUser, isAdmin }: Page
     };
 
     const groupedResults = session.results.reduce((acc, result) => {
-        const typeName = result.test?.testType?.name ?? 'Sin tipo de prueba';
+        const typeName = result.test?.test_type?.name ?? 'Sin tipo de prueba';
         if (!acc[typeName]) acc[typeName] = [];
         acc[typeName].push(result);
         return acc;
@@ -63,8 +73,8 @@ export default function TestSessionsShow({ session, currentUser, isAdmin }: Page
     const passedTests = session.results.filter((r) => r.result === 'aprobado').length;
     const failedTests = session.results.filter((r) => r.result === 'reprobado').length;
 
-    const productName = session?.product_version?.product?.name ?? 'N/A';
-    const version = session?.product_version?.version ?? 'N/A';
+    const productName = session?.productVersion?.product?.name ?? 'N/A';
+    const version = session?.productVersion?.version ?? 'N/A';
 
     return (
         <Layout title={`Sesión ${session.session_code}`}>
@@ -114,14 +124,15 @@ export default function TestSessionsShow({ session, currentUser, isAdmin }: Page
                                     <th className="px-4 py-3 text-left text-sm">Resultado Esperado</th>
                                     <th className="px-4 py-3 text-center text-sm">Resultado</th>
                                     <th className="px-4 py-3 text-left text-sm">Notas</th>
+                                    <th className="px-4 py-3 text-left text-sm">Adjuntos</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {results.map((result) => (
                                     <tr key={result.id} className="border-t">
-                                        <td className="px-4 py-3 text-sm">{result.test.name}</td>
-                                        <td className="px-4 py-3 text-sm">{result.test.description}</td>
-                                        <td className="px-4 py-3 text-sm">{result.test.expected_result}</td>
+                                        <td className="px-4 py-3 text-sm">{(result as any).test?.name ?? '-'}</td>
+                                        <td className="px-4 py-3 text-sm">{(result as any).test?.description ?? '-'}</td>
+                                        <td className="px-4 py-3 text-sm">{(result as any).test?.expected_result ?? '-'}</td>
                                         <td className="px-4 py-3 text-center">
                                             <span className={`px-2 py-1 rounded text-sm font-medium ${
                                                 result.result === 'aprobado' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
@@ -130,6 +141,24 @@ export default function TestSessionsShow({ session, currentUser, isAdmin }: Page
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-sm">{result.notes ?? '-'}</td>
+                                        <td className="px-4 py-3 text-sm">
+                                            {result.attachments && result.attachments.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {result.attachments.map((att) => (
+                                                        <a
+                                                            key={att.id}
+                                                            href={`/storage/${att.filename}`}
+                                                            target="_blank"
+                                                            className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs hover:bg-gray-300"
+                                                        >
+                                                            {att.original_name}
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">-</span>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

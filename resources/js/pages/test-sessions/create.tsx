@@ -57,7 +57,21 @@ export default function TestSessionsCreate({ versions, currentUser, isAdmin }: P
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/test-sessions', { product_version_id: productVersionId, results }, { preserveScroll: true });
+        const formData = new FormData();
+        formData.append('product_version_id', productVersionId);
+        formData.append('results', JSON.stringify(results));
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach((input) => {
+            const fileInput = input as HTMLInputElement;
+            if (fileInput.files && fileInput.files.length > 0) {
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append(`attachments[${fileInput.name}][]`, fileInput.files[i]);
+                }
+            }
+        });
+        router.post('/test-sessions', formData, {
+            preserveScroll: true,
+        });
     };
 
     return (
@@ -145,6 +159,7 @@ export default function TestSessionsCreate({ versions, currentUser, isAdmin }: P
                                             <th className="px-4 py-3 text-center text-sm">Aprobado</th>
                                             <th className="px-4 py-3 text-center text-sm">Reprobado</th>
                                             <th className="px-4 py-3 text-left text-sm">Notas</th>
+                                            <th className="px-4 py-3 text-center text-sm">Adjuntos</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -174,12 +189,21 @@ export default function TestSessionsCreate({ versions, currentUser, isAdmin }: P
                                                         />
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <input
-                                                            type="text"
+                                                        <textarea
                                                             value={testResult?.notes || ''}
                                                             onChange={(e) => setNotes(test.id, e.target.value)}
                                                             placeholder="..."
-                                                            className="w-full px-2 py-1 border rounded text-sm"
+                                                            rows={2}
+                                                            className="w-full px-2 py-1 border rounded text-sm resize-y"
+                                                        />
+                                                    </td>
+                                                    <td className="px-4 py-3 text-center">
+                                                        <input
+                                                            type="file"
+                                                            name={String(test.id)}
+                                                            multiple
+                                                            accept="image/*,.pdf,.doc,.docx,.zip"
+                                                            className="text-xs"
                                                         />
                                                     </td>
                                                 </tr>
