@@ -61,6 +61,7 @@ CMD bash -lc '\
         php artisan view:clear || true && \
         echo "== Running migrations ==" && \
         php artisan migrate --force && \
+        php artisan storage:link && \
         echo "== Starting Laravel server ==" && \
         php artisan serve --host=0.0.0.0 --port=8000; \
     else \
