@@ -18,19 +18,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     gnupg \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install \
-        pdo \
-        pdo_pgsql \
-        pgsql \
-        pdo_mysql \
-        zip \
-        intl \
-        bcmath \
-        soap \
-        gd \
-        gmp \
-        tidy \
-        opcache \
+    && docker-php-ext-install pdo pdo_pgsql pgsql pdo_mysql zip intl bcmath soap gd gmp tidy opcache fileinfo \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

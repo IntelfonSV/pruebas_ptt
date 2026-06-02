@@ -12,6 +12,9 @@ interface ProductVersion {
     version: string;
     product_id: number;
     product: Product;
+    apk_file: string | null;
+    test_manual: string | null;
+    url: string | null;
 }
 
 interface PageProps {
@@ -49,6 +52,9 @@ export default function ProductVersionsIndex({ versions, products, isAdmin }: Pa
                             <th className="px-4 py-3 text-left text-sm">ID</th>
                             <th className="px-4 py-3 text-left text-sm">Producto</th>
                             <th className="px-4 py-3 text-left text-sm">Versión</th>
+                            <th className="px-4 py-3 text-center text-sm">APK</th>
+                            <th className="px-4 py-3 text-center text-sm">Manual</th>
+                            <th className="px-4 py-3 text-center text-sm">URL</th>
                             <th className="px-4 py-3 text-center text-sm">Acciones</th>
                         </tr>
                     </thead>
@@ -60,6 +66,46 @@ export default function ProductVersionsIndex({ versions, products, isAdmin }: Pa
                                     <td className="px-4 py-3">{v.id}</td>
                                     <td className="px-4 py-3">{product?.name}</td>
                                     <td className="px-4 py-3 font-mono">{v.version}</td>
+                                    <td className="px-4 py-3 text-center">
+                                        {v.apk_file ? (
+                                            <a
+                                                href={`/storage/${v.apk_file}`}
+                                                target="_blank"
+                                                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                                            >
+                                                Descargar
+                                            </a>
+                                        ) : (
+                                            <span className="text-gray-400 text-sm">Sin archivo</span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                        {v.test_manual ? (
+                                            <a
+                                                href={`/storage/${v.test_manual}`}
+                                                target="_blank"
+                                                className="px-2 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600"
+                                            >
+                                                PDF
+                                            </a>
+                                        ) : (
+                                            <span className="text-gray-400 text-sm">-</span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                        {v.url ? (
+                                            <a
+                                                href={v.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:underline text-sm"
+                                            >
+                                                Abrir
+                                            </a>
+                                        ) : (
+                                            <span className="text-gray-400 text-sm">-</span>
+                                        )}
+                                    </td>
                                     <td className="px-4 py-3 text-center">
                                         <a
                                             href={`/product-versions/${v.id}`}

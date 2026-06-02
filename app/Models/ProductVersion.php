@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductVersion extends Model
 {
-    protected $fillable = ['product_id', 'version'];
+    protected $fillable = ['product_id', 'version', 'apk_file', 'url', 'test_manual'];
 
     public function product(): BelongsTo
     {

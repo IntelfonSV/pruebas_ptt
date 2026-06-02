@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import Layout from '../../layouts/Layout';
 import { useState } from 'react';
 
@@ -23,6 +23,9 @@ interface ProductVersion {
     version: string;
     product: Product;
     test_types: TestType[];
+    apk_file: string | null;
+    test_manual: string | null;
+    url: string | null;
 }
 
 interface PageProps {
@@ -47,8 +50,31 @@ export default function ProductVersionsEdit({ productVersion, testTypes, current
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        router.put(`/product-versions/${productVersion.id}`, {
-            test_type_ids: selectedTypeIds,
+        const formData = new FormData();
+        formData.append('test_type_ids', JSON.stringify(selectedTypeIds));
+        const urlInput = document.getElementById('url') as HTMLInputElement;
+        if (urlInput?.value) {
+            formData.append('url', urlInput.value);
+        }
+        const fileInput = document.getElementById('apk_file') as HTMLInputElement;
+        if (fileInput?.files?.[0]) {
+            formData.append('apk_file', fileInput.files[0]);
+        }
+        const deleteCheckbox = document.getElementById('delete_apk') as HTMLInputElement;
+        if (deleteCheckbox?.checked) {
+            formData.append('delete_apk', '1');
+        }
+        const manualInput = document.getElementById('test_manual') as HTMLInputElement;
+        if (manualInput?.files?.[0]) {
+            formData.append('test_manual', manualInput.files[0]);
+        }
+        const deleteManualCheckbox = document.getElementById('delete_manual') as HTMLInputElement;
+        if (deleteManualCheckbox?.checked) {
+            formData.append('delete_manual', '1');
+        }
+        router.post(`/product-versions/${productVersion.id}`, {
+            _method: 'put',
+            ...Object.fromEntries(formData),
         }, {
             preserveScroll: true,
         });
@@ -89,6 +115,95 @@ export default function ProductVersionsEdit({ productVersion, testTypes, current
                             </label>
                         ))}
                     </div>
+                </div>
+
+                <div className="mb-6">
+                    <label className="block font-medium mb-2">Archivo APK</label>
+                    {productVersion.apk_file && (
+                        <div className="mb-3 p-3 bg-gray-100 rounded flex items-center justify-between">
+                            <span className="text-sm text-gray-600">
+                                Archivo actual: {productVersion.apk_file.split('/').pop()}
+                            </span>
+                            <a
+                                href={`/storage/${productVersion.apk_file}`}
+                                target="_blank"
+                                className="text-blue-600 hover:underline text-sm"
+                            >
+                                Ver
+                            </a>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        id="apk_file"
+                        name="apk_file"
+                        accept=".apk,application/vnd.android.package-archive,application/zip"
+                        className="w-full md:w-1/2 px-4 py-2 border rounded"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Subir un nuevo archivo reemplazará el actual</p>
+                </div>
+
+                {productVersion.apk_file && (
+                    <div className="mb-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                id="delete_apk"
+                                className="w-4 h-4"
+                            />
+                            <span className="text-red-600">Eliminar archivo actual</span>
+                        </label>
+                    </div>
+                )}
+
+                <div className="mb-6">
+                    <label className="block font-medium mb-2">Manual de Pruebas (PDF)</label>
+                    {productVersion.test_manual && (
+                        <div className="mb-3 p-3 bg-gray-100 rounded flex items-center justify-between">
+                            <span className="text-sm text-gray-600">
+                                Actual: {productVersion.test_manual.split('/').pop()}
+                            </span>
+                            <a
+                                href={`/storage/${productVersion.test_manual}`}
+                                target="_blank"
+                                className="text-blue-600 hover:underline text-sm"
+                            >
+                                Ver
+                            </a>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        id="test_manual"
+                        name="test_manual"
+                        accept="application/pdf,.pdf"
+                        className="w-full md:w-1/2 px-4 py-2 border rounded"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Subir un nuevo archivo reemplazará el actual (máx 50MB)</p>
+                </div>
+
+                {productVersion.test_manual && (
+                    <div className="mb-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                id="delete_manual"
+                                className="w-4 h-4"
+                            />
+                            <span className="text-red-600">Eliminar manual actual</span>
+                        </label>
+                    </div>
+                )}
+
+                <div className="mb-6">
+                    <label className="block font-medium mb-2">URL (para versiones web)</label>
+                    <input
+                        type="url"
+                        id="url"
+                        defaultValue={productVersion.url || ''}
+                        placeholder="https://ejemplo.com"
+                        className="w-full md:w-1/2 px-4 py-2 border rounded"
+                    />
                 </div>
 
                 <div className="flex gap-4">

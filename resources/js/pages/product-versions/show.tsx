@@ -22,6 +22,9 @@ interface ProductVersion {
     version: string;
     product: Product;
     test_types: TestType[];
+    apk_file: string | null;
+    test_manual: string | null;
+    url: string | null;
 }
 
 interface PageProps {
@@ -40,7 +43,38 @@ export default function ProductVersionsShow({ productVersion, currentUser, isAdm
             </a>
 
             <h2 className="text-2xl font-bold mb-2">{productVersion.product?.name}</h2>
-            <p className="text-xl text-gray-600 mb-6">{productVersion.version}</p>
+            <p className="text-xl text-gray-600 mb-4">{productVersion.version}</p>
+
+            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg flex flex-wrap gap-4">
+                {productVersion.apk_file && (
+                    <a
+                        href={`/storage/${productVersion.apk_file}`}
+                        target="_blank"
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                        Descargar APK
+                    </a>
+                )}
+                {productVersion.test_manual && (
+                    <a
+                        href={`/storage/${productVersion.test_manual}`}
+                        target="_blank"
+                        className="inline-block px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                    >
+                        Ver Manual PDF
+                    </a>
+                )}
+                {productVersion.url && (
+                    <a
+                        href={productVersion.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                        Abrir URL
+                    </a>
+                )}
+            </div>
 
             {isAdmin && (
                 <a

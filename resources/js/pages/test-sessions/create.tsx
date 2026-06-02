@@ -19,6 +19,9 @@ interface ProductVersion {
     version: string;
     product: { name: string };
     test_types: TestType[];
+    apk_file: string | null;
+    test_manual: string | null;
+    url: string | null;
 }
 
 interface PageProps {
@@ -89,6 +92,42 @@ export default function TestSessionsCreate({ versions, currentUser, isAdmin }: P
                         />
                     </div>
                 </div>
+
+                {selectedVersion && (selectedVersion.apk_file || selectedVersion.test_manual || selectedVersion.url) && (
+                    <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <h3 className="font-medium mb-3">Recursos de la versión:</h3>
+                        <div className="flex flex-wrap gap-3">
+                            {selectedVersion.apk_file && (
+                                <a
+                                    href={`/storage/${selectedVersion.apk_file}`}
+                                    target="_blank"
+                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                >
+                                    Descargar APK
+                                </a>
+                            )}
+                            {selectedVersion.test_manual && (
+                                <a
+                                    href={`/storage/${selectedVersion.test_manual}`}
+                                    target="_blank"
+                                    className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                                >
+                                    Ver Manual PDF
+                                </a>
+                            )}
+                            {selectedVersion.url && (
+                                <a
+                                    href={selectedVersion.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                >
+                                    Abrir URL
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {testTypes.length > 0 ? (
                     testTypes.map((type) => (

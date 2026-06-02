@@ -29,7 +29,27 @@ export default function ProductVersionsCreate({ products, testTypes, currentUser
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/product-versions', form, { preserveScroll: true });
+        const formData = new FormData();
+        formData.append('product_id', form.product_id);
+        formData.append('version', form.version);
+        form.test_type_ids.forEach((id) => {
+            formData.append('test_type_ids[]', id.toString());
+        });
+        const urlInput = document.getElementById('url') as HTMLInputElement;
+        if (urlInput?.value) {
+            formData.append('url', urlInput.value);
+        }
+        const fileInput = document.getElementById('apk_file') as HTMLInputElement;
+        if (fileInput?.files?.[0]) {
+            formData.append('apk_file', fileInput.files[0]);
+        }
+        const manualInput = document.getElementById('test_manual') as HTMLInputElement;
+        if (manualInput?.files?.[0]) {
+            formData.append('test_manual', manualInput.files[0]);
+        }
+        router.post('/product-versions', formData, {
+            preserveScroll: true,
+        });
     };
 
     const toggleTestType = (id: number) => {
@@ -86,6 +106,40 @@ export default function ProductVersionsCreate({ products, testTypes, currentUser
                             </label>
                         ))}
                     </div>
+                </div>
+
+                <div className="mb-6">
+                    <label className="block font-medium mb-2">Archivo APK (opcional)</label>
+                    <input
+                        type="file"
+                        id="apk_file"
+                        name="apk_file"
+                        accept=".apk,application/vnd.android.package-archive,application/zip"
+                        className="w-full md:w-1/3 px-4 py-2 border rounded"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Máximo 200 MB</p>
+                </div>
+
+                <div className="mb-6">
+                    <label className="block font-medium mb-2">Manual de Pruebas (PDF, opcional)</label>
+                    <input
+                        type="file"
+                        id="test_manual"
+                        name="test_manual"
+                        accept="application/pdf,.pdf"
+                        className="w-full md:w-1/3 px-4 py-2 border rounded"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Máximo 50 MB</p>
+                </div>
+
+                <div className="mb-6">
+                    <label className="block font-medium mb-2">URL (opcional, para versiones web)</label>
+                    <input
+                        type="url"
+                        id="url"
+                        placeholder="https://ejemplo.com"
+                        className="w-full md:w-1/2 px-4 py-2 border rounded"
+                    />
                 </div>
 
                 <div className="flex gap-4">
