@@ -62,12 +62,9 @@ class TestSessionController extends Controller
             'results.*.notes' => 'nullable|string',
         ]);
 
-        $pv = ProductVersion::find($validated['product_version_id']);
-
         $session = TestSession::create([
             'session_code' => TestSession::generateCode(),
             'product_version_id' => $validated['product_version_id'],
-            'product_id' => $pv->product_id,
             'user_performer' => Session::get('username'),
         ]);
 

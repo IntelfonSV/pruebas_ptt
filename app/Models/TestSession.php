@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TestSession extends Model
 {
-    protected $fillable = ['session_code', 'user_performer', 'product_version_id', 'product_id'];
+    protected $fillable = ['session_code', 'user_performer', 'product_version_id'];
 
     public function productVersion(): BelongsTo
     {
